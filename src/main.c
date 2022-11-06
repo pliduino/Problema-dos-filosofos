@@ -11,31 +11,33 @@
 #endif
 
 const int CLOCK = 5;
+const int CHANCE = 75;
 
 typedef enum _state
 {
     THINKING,
     HUNGRY,
     EATING
-} Philosopher;
+} PhilosopherState;
 
 typedef struct _table
 {
-    Philosopher state[5];
+    PhilosopherState state[5];
     sem_t semaphores[5];
 
 } Table;
 
 Table table;
 
-void InitTable(Table *table);
+void table_init(Table *table);
 void PrintTable(Table *table);
-void SetHungry(Table *table, int index);
-int TryEat(Table *table, int index);
-void FinishEating(Table *table, int index);
-void *philos(void *index);
+void table_set_hungry(Table *table, int index);
+int table_try_eat(Table *table, int index);
+void table_finish_eating(Table *table, int index);
+void *philosopher(void *index);
+void delay(int m_seconds);
 
-void InitTable(Table *table)
+void table_init(Table *table)
 {
     for (int i = 0; i < 5; i++)
     {
@@ -45,16 +47,16 @@ void InitTable(Table *table)
     PrintTable(table);
 }
 
-void SetHungry(Table *table, int index)
+void table_set_hungry(Table *table, int index)
 {
     table->state[index] = HUNGRY;
 
-    TryEat(table, index);
+    table_try_eat(table, index);
 
     sem_wait(&(table->semaphores[index]));
 }
 
-int TryEat(Table *table, int index)
+int table_try_eat(Table *table, int index)
 {
     // Invalid Index
     if (index > 4)
@@ -73,15 +75,15 @@ int TryEat(Table *table, int index)
     return 0;
 }
 
-void FinishEating(Table *table, int index)
+void table_finish_eating(Table *table, int index)
 {
     table->state[index] = THINKING;
 
-    TryEat(table, (index + 1) % 5);
-    TryEat(table, (index + 4) % 5);
+    table_try_eat(table, (index + 1) % 5);
+    table_try_eat(table, (index + 4) % 5);
 }
 
-void *philos(void *index)
+void *philosopher(void *index)
 {
 
     int ph = *(int *)index;
@@ -103,12 +105,12 @@ void *philos(void *index)
         printf("%i: Executed\n", ph);
         i = rand() % 101;
 
-        if (i < 30)
+        if (i < CHANCE)
         {
             if (table.state[ph] == EATING)
-                FinishEating(&table, ph);
+                table_finish_eating(&table, ph);
             else
-                SetHungry(&table, ph);
+                table_set_hungry(&table, ph);
         }
     }
 }
@@ -123,37 +125,33 @@ void PrintTable(Table *table)
     printf("   *** \n");
 }
 
+void delay(int m_seconds)
+{
+    delay(1000 / CLOCK);
+}
+
 int main()
 {
     int n[5];
     pthread_t T[5];
 
-    InitTable(&table);
+    table_init(&table);
 
     for (int i = 0; i < 5; i++)
     {
         n[i] = i;
-        pthread_create(&T[i], NULL, philos, (void *)&n[i]);
+        pthread_create(&T[i], NULL, philosopher, (void *)&n[i]);
     }
 
-// Unsyncs it with threads
-#ifdef _WIN32
-    Sleep(100 / CLOCK);
-#endif
-#ifdef __unix__
-    usleep((100 / CLOCK) * 1000);
-#endif
+    // Unsyncs it with threads
+    delay(100 / CLOCK);
 
     while (1)
     {
-#ifdef _WIN32
-        Sleep(1000 / CLOCK);
-#endif
-#ifdef __unix__
-        usleep((1000 / CLOCK) * 1000);
-#endif
+        delay(1000 / CLOCK);
 
         PrintTable(&table);
+        CheckExec();
     }
 
     for (int i = 0; i < 5; i++)
