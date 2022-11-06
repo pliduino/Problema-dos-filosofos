@@ -4,6 +4,7 @@ CFLAGS = -Wall
 SRC = src
 OUTPUT = out
 
+$(shell mkdir -p $(OUTPUT))
 
 all:
 	gcc $(CFLAGS) $(SRC)/main.c -o $(OUTPUT)/main.exe
