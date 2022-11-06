@@ -7,7 +7,7 @@ OUTPUT = out
 $(shell mkdir -p $(OUTPUT))
 
 all:
-	gcc $(CFLAGS) $(SRC)/main.c -o $(OUTPUT)/main.exe
+	$(CC) $(CFLAGS) $(SRC)/main.c -o $(OUTPUT)/main.exe
 
 run: all
 	./$(OUTPUT)/main.exe
