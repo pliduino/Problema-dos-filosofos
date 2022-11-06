@@ -6,10 +6,11 @@
 #ifdef __unix__
 #include <unistd.h>
 #endif
-
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
+const int CLOCK = 5;
 
 typedef enum _state
 {
@@ -39,7 +40,7 @@ void InitTable(Table *table)
     for (int i = 0; i < 5; i++)
     {
         // table->state[i] == THINKING;
-        sem_init(table->semaphores[i], 0, 0);
+        sem_init(&(table->semaphores[i]), 0, 0);
     }
     PrintTable(table);
 }
@@ -50,10 +51,7 @@ void SetHungry(Table *table, int index)
 
     TryEat(table, index);
 
-    int val;
-    sem_getvalue(table->semaphores[index], &val);
-
-    sem_wait(table->semaphores[index]);
+    sem_wait(&(table->semaphores[index]));
 }
 
 int TryEat(Table *table, int index)
@@ -70,7 +68,7 @@ int TryEat(Table *table, int index)
         table->state[(index + 4) % 5] != EATING)
     {
         table->state[index] = EATING;
-        sem_post(table->semaphores[index]);
+        sem_post(&(table->semaphores[index]));
     }
     return 0;
 }
@@ -97,12 +95,12 @@ void *philos(void *index)
     {
 
 #ifdef _WIN32
-        Sleep(500);
+        Sleep(1000 / CLOCK);
 #endif
 #ifdef __unix__
-        usleep(500 * 1000);
+        usleep((1000 / CLOCK) * 1000);
 #endif
-
+        printf("%i: Executed\n", ph);
         i = rand() % 101;
 
         if (i < 30)
@@ -140,19 +138,19 @@ int main()
 
 // Unsyncs it with threads
 #ifdef _WIN32
-    Sleep(200);
+    Sleep(100 / CLOCK);
 #endif
 #ifdef __unix__
-    usleep(200 * 1000);
+    usleep((100 / CLOCK) * 1000);
 #endif
 
     while (1)
     {
 #ifdef _WIN32
-        Sleep(500);
+        Sleep(1000 / CLOCK);
 #endif
 #ifdef __unix__
-        usleep(500 * 1000);
+        usleep((1000 / CLOCK) * 1000);
 #endif
 
         PrintTable(&table);
