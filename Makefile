@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall
+CFLAGS = -Wall -pthread
 SRC = src
 OUTPUT = out
 
