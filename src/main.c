@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <semaphore.h>
 #include <pthread.h>
 
@@ -22,19 +23,18 @@ void InitTable(Table *table)
     for (int i = 0; i < 5; i++)
     {
         table->state[i] == THINKING;
-        sem_init(table->semaphores[i], 0, 1);
+        sem_init(table->semaphores[i], 0, 0);
     }
 }
 
 void SetHungry(Table *table, int index)
 {
+    printf("Philosopher %i is hungry\n", index);
     table->state[index] = HUNGRY;
+
     TryEat(table, index);
 
-    if (table->state[index] != EATING)
-    {
-        sem_wait(table->semaphores[index]);
-    }
+    sem_wait(table->semaphores[index]);
 }
 
 int TryEat(Table *table, int index)
@@ -49,6 +49,7 @@ int TryEat(Table *table, int index)
         table->state[(index + 1) % 5] != EATING &&
         table->state[(index + 4) % 5] != EATING)
     {
+        printf("Philosopher %i is eating\n", index);
         table->state[index] = EATING;
         sem_post(table->semaphores[index]);
     }
@@ -57,6 +58,7 @@ int TryEat(Table *table, int index)
 
 void FinishEating(Table *table, int index)
 {
+    printf("Philosopher %i finished eating\n", index);
     table->state[index] = THINKING;
 
     TryEat(table, (index + 1) % 5);
@@ -66,12 +68,28 @@ void FinishEating(Table *table, int index)
 void philos(void *index)
 {
     int ph = *(int *)index;
+    int i = rand() % 101;
+
+    while (1)
+    {
+        sleep(3);
+
+        if (i < 10)
+        {
+            if (table.state[ph] == EATING)
+                FinishEating(&table, ph);
+            else
+                SetHungry(&table, ph);
+        }
+    }
 }
 
 int main()
 {
     int n[5];
     pthread_t T[5];
+
+    srand(0);
     InitTable(&table);
 
     for (int i = 0; i < 5; i++)
@@ -79,6 +97,7 @@ int main()
         n[i] = i;
         pthread_create(&T[i], NULL, philos, (void *)&n[i]);
     }
+
     for (int i = 0; i < 5; i++)
     {
         pthread_join(T[i], NULL);
