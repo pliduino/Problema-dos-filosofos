@@ -4,6 +4,7 @@
 #include <semaphore.h>
 #include "monitor.h"
 
+/// @brief Philosopher possible states
 typedef enum __philosopher_state
 {
     THINKING,
@@ -11,6 +12,7 @@ typedef enum __philosopher_state
     EATING
 } philosopher_state_t;
 
+/// @brief List of functions contained inside table.monitor
 typedef enum __table_funcs
 {
     TRY_EAT,
@@ -21,18 +23,17 @@ typedef enum __table_funcs
 
 typedef struct __table table_t;
 
-/// @brief Initializes a new table
-/// @param table Pointer to a table_t
-void table_init(table_t *table);
+/// @brief Initializes a new table_t
+table_t *table_init();
 
+/// @brief Frees a table_t allocated memory
 void table_destroy(table_t *table);
 
-void table_exec(table_t *table, table_funcs_t func, unsigned int index);
+void table_exec(table_t *table, table_funcs_t func, int index);
 
-/// @param table Pointer to a table_t
-/// @return A copy of table.state
-philosopher_state_t table_get_state(table_t *table, unsigned int index);
+/// @brief Returns a copy of table.state[index]
+philosopher_state_t table_get_state(table_t *table, int index);
 
-void table_set_hungry(table_t *table, unsigned int index);
+void table_set_hungry(table_t *table, int index);
 
 #endif // !TABLE_H

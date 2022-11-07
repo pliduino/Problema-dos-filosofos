@@ -11,11 +11,11 @@
 #include <windows.h>
 #endif
 
-const int CLOCK = 5000;
-const int MAX_CLOCK = 50000;
-const int CHANCE = 50;
+const int CLOCK = 500;
+const int MAX_CLOCK = 5000;
+const int CHANCE = 75;
 
-table_t table;
+table_t *table;
 
 void delay(int m_seconds);
 void *philosopher(void *index);
@@ -46,14 +46,14 @@ void *philosopher(void *index)
 
         if (i < CHANCE)
         {
-            if (table_get_state(&table, ph) == EATING)
+            if (table_get_state(table, ph) == EATING)
             {
-                table_exec(&table, FINISH_EATING, ph);
+                table_exec(table, FINISH_EATING, ph);
             }
 
             else
             {
-                table_set_hungry(&table, ph);
+                table_set_hungry(table, ph);
             }
         }
     }
@@ -64,7 +64,7 @@ int main()
     int n[5];
     pthread_t T[5];
 
-    table_init(&table);
+    table = table_init();
 
     for (int i = 0; i < 5; i++)
     {
@@ -74,9 +74,9 @@ int main()
 
     for (int i = 0; i < MAX_CLOCK; i++)
     {
+        printf("\nStep: %i\n", i);
         delay(1000 / CLOCK);
-
-        table_exec(&table, CHECK_EXEC, 0);
+        table_exec(table, CHECK_EXEC, -1);
     }
 
     for (int i = 0; i < 5; i++)
@@ -84,5 +84,5 @@ int main()
         pthread_cancel(T[i]);
     }
 
-    table_destroy(&table);
+    table_destroy(table);
 }
