@@ -1,10 +1,15 @@
 # **Problema do Jantar dos Filósofos**
 
+[Relatório](#relatório)<br/>
 [Lógica do programa](#lógica-do-programa)<br/>
 [Resultados](#resultados)<br/>
 [Execução](#execução)<br/>
 
 
+## Relatório
+[O relatório se encontra aqui](./doc/Relatório%20Filósofos%2011796847.pdf)
+
+<br/>
 
 ## Lógica do programa
 <br/>
