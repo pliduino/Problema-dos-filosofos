@@ -2,6 +2,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+struct __table
+{
+    philosopher_state_t state[5];
+    sem_t semaphores[5];
+    monitor_t monitor;
+};
+
 void table_try_eat(void *p_table, unsigned int index)
 {
     table_t *table = (table_t *)p_table;
@@ -54,7 +61,7 @@ void table_print(table_t *p_table)
     printf("   *** \n");
 }
 
-void table_exec(table_t *table, enum FUNCS func, unsigned int index)
+void table_exec(table_t *table, table_funcs_t func, unsigned int index)
 {
     monitor_exec(&(table->monitor), func, table, index);
 }
@@ -93,4 +100,9 @@ void table_init(table_t *table)
 void table_destroy(table_t *table)
 {
     monitor_destroy(&(table->monitor));
+}
+
+philosopher_state_t table_get_state(table_t *table, unsigned int index)
+{
+    return table->state[index];
 }

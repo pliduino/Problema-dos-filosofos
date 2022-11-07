@@ -46,7 +46,7 @@ void *philosopher(void *index)
 
         if (i < CHANCE)
         {
-            if (table.state[ph] == EATING)
+            if (table_get_state(&table, ph) == EATING)
             {
                 table_exec(&table, FINISH_EATING, ph);
             }

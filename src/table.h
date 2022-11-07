@@ -11,27 +11,27 @@ typedef enum __philosopher_state
     EATING
 } philosopher_state_t;
 
-enum FUNCS
+typedef enum __table_funcs
 {
     TRY_EAT,
     FINISH_EATING,
     CHECK_EXEC,
     PRINT
-};
+} table_funcs_t;
 
-typedef struct __table
-{
-    philosopher_state_t state[5];
-    sem_t semaphores[5];
-    monitor_t monitor;
+typedef struct __table table_t;
 
-} table_t;
-
+/// @brief Initializes a new table
+/// @param table Pointer to a table_t
 void table_init(table_t *table);
 
 void table_destroy(table_t *table);
 
-void table_exec(table_t *table, enum FUNCS func, unsigned int index);
+void table_exec(table_t *table, table_funcs_t func, unsigned int index);
+
+/// @param table Pointer to a table_t
+/// @return A copy of table.state
+philosopher_state_t table_get_state(table_t *table, unsigned int index);
 
 void table_set_hungry(table_t *table, unsigned int index);
 
