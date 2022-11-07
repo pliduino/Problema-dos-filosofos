@@ -81,7 +81,7 @@ int main()
 
     for (int i = 0; i < 5; i++)
     {
-        pthread_join(T[i], NULL);
+        pthread_cancel(T[i]);
     }
 
     table_destroy(&table);
