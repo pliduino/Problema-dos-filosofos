@@ -12,6 +12,7 @@
 #endif
 
 const int CLOCK = 5000;
+const int MAX_CLOCK = 50000;
 const int CHANCE = 50;
 
 table_t table;
@@ -71,7 +72,7 @@ int main()
         pthread_create(&T[i], NULL, philosopher, (void *)&n[i]);
     }
 
-    while (1)
+    for (int i = 0; i < MAX_CLOCK; i++)
     {
         delay(1000 / CLOCK);
 
@@ -82,5 +83,6 @@ int main()
     {
         pthread_join(T[i], NULL);
     }
+
     table_destroy(&table);
 }
