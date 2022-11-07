@@ -4,6 +4,8 @@
 #include <semaphore.h>
 #include "monitor.h"
 
+const int MAX_TRY_EAT_COUNT = 5;
+
 /// @brief Philosopher possible states
 typedef enum __philosopher_state
 {
