@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <semaphore.h>
 #include <pthread.h>
+#include "table.h"
 
 #ifdef __unix__
 #include <unistd.h>
@@ -10,124 +11,51 @@
 #include <windows.h>
 #endif
 
-const int CLOCK = 5;
-const int CHANCE = 75;
+const int CLOCK = 5000;
+const int CHANCE = 50;
 
-typedef enum _state
-{
-    THINKING,
-    HUNGRY,
-    EATING
-} PhilosopherState;
+table_t table;
 
-typedef struct _table
-{
-    PhilosopherState state[5];
-    sem_t semaphores[5];
-
-} Table;
-
-Table table;
-
-void table_init(Table *table);
-void PrintTable(Table *table);
-void table_set_hungry(Table *table, int index);
-int table_try_eat(Table *table, int index);
-void table_finish_eating(Table *table, int index);
-void *philosopher(void *index);
 void delay(int m_seconds);
+void *philosopher(void *index);
 
-void table_init(Table *table)
+void delay(int milli_seconds)
 {
-    for (int i = 0; i < 5; i++)
-    {
-        // table->state[i] == THINKING;
-        sem_init(&(table->semaphores[i]), 0, 0);
-    }
-    PrintTable(table);
-}
-
-void table_set_hungry(Table *table, int index)
-{
-    table->state[index] = HUNGRY;
-
-    table_try_eat(table, index);
-
-    sem_wait(&(table->semaphores[index]));
-}
-
-int table_try_eat(Table *table, int index)
-{
-    // Invalid Index
-    if (index > 4)
-    {
-        printf("INVALID INDEX");
-        return -1;
-    }
-
-    if (table->state[index] == HUNGRY &&
-        table->state[(index + 1) % 5] != EATING &&
-        table->state[(index + 4) % 5] != EATING)
-    {
-        table->state[index] = EATING;
-        sem_post(&(table->semaphores[index]));
-    }
-    return 0;
-}
-
-void table_finish_eating(Table *table, int index)
-{
-    table->state[index] = THINKING;
-
-    table_try_eat(table, (index + 1) % 5);
-    table_try_eat(table, (index + 4) % 5);
+#ifdef __unix__
+    usleep(milli_seconds * 1000);
+#endif
+#ifdef _WIN32
+    Sleep(milli_seconds);
+#endif
 }
 
 void *philosopher(void *index)
 {
 
-    int ph = *(int *)index;
+    unsigned int ph = *(int *)index;
     int i;
 
     srand(ph);
 
-    printf("Philosopher %i started\n", ph);
-
     while (1)
     {
 
-#ifdef _WIN32
-        Sleep(1000 / CLOCK);
-#endif
-#ifdef __unix__
-        usleep((1000 / CLOCK) * 1000);
-#endif
-        printf("%i: Executed\n", ph);
+        delay(1000 / CLOCK);
         i = rand() % 101;
 
         if (i < CHANCE)
         {
             if (table.state[ph] == EATING)
-                table_finish_eating(&table, ph);
+            {
+                table_exec(&table, FINISH_EATING, ph);
+            }
+
             else
+            {
                 table_set_hungry(&table, ph);
+            }
         }
     }
-}
-
-void PrintTable(Table *table)
-{
-    printf("\n    %i", (int)table->state[0]);
-    printf("\n   *** \n");
-    printf("%i ***** %i\n", (int)table->state[4], (int)table->state[1]);
-    printf(" ******* \n");
-    printf("%i ***** %i\n", (int)table->state[3], (int)table->state[2]);
-    printf("   *** \n");
-}
-
-void delay(int m_seconds)
-{
-    delay(1000 / CLOCK);
 }
 
 int main()
@@ -143,19 +71,16 @@ int main()
         pthread_create(&T[i], NULL, philosopher, (void *)&n[i]);
     }
 
-    // Unsyncs it with threads
-    delay(100 / CLOCK);
-
     while (1)
     {
         delay(1000 / CLOCK);
 
-        PrintTable(&table);
-        CheckExec();
+        table_exec(&table, CHECK_EXEC, 0);
     }
 
     for (int i = 0; i < 5; i++)
     {
         pthread_join(T[i], NULL);
     }
+    table_destroy(&table);
 }
