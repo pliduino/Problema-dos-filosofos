@@ -2,13 +2,17 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+const int MAX_STARVATION_COUNT = 5;
+
 struct __table
 {
     philosopher_state_t state[5];
     sem_t condition[5];
-    sem_t block_mutex[5];
     monitor_t monitor;
-    int try_eat_count[5];
+
+    // Fixes starvation problems
+    sem_t block_mutex[5];
+    int starvation_count[5];
 };
 
 void table_try_eat(void *p_table, int index)
@@ -27,11 +31,14 @@ void table_try_eat(void *p_table, int index)
     {
         table->state[index] = EATING;
         sem_post(&(table->condition[index]));
-        table->try_eat_count[index] = 0;
+
+        // Resets starvation
+        table->starvation_count[index] = 0;
         return;
     }
 
-    table->try_eat_count[index]++;
+    // Adds towards starvation counter
+    table->starvation_count[index]++;
 }
 
 void table_set_hungry(table_t *table, int index)
@@ -67,7 +74,7 @@ void table_print(void *p_table)
 
 void table_exec(table_t *table, table_funcs_t func, int index)
 {
-    char is_priority = table->try_eat_count[index] > MAX_TRY_EAT_COUNT;
+    char is_priority = table->starvation_count[index] > MAX_STARVATION_COUNT;
 
     if (func == TRY_EAT && index >= 0)
     {
@@ -82,11 +89,13 @@ void table_exec(table_t *table, table_funcs_t func, int index)
     monitor_exec(&(table->monitor), func, table, index);
 
     if (func == TRY_EAT && index >= 0)
-        sem_post(&(table->block_mutex[index]));
-    if (is_priority)
     {
-        sem_post(&(table->block_mutex[(index + 1) % 5]));
-        sem_post(&(table->block_mutex[(index + 4) % 5]));
+        sem_post(&(table->block_mutex[index]));
+        if (is_priority)
+        {
+            sem_post(&(table->block_mutex[(index + 1) % 5]));
+            sem_post(&(table->block_mutex[(index + 4) % 5]));
+        }
     }
 }
 
