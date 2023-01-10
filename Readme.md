@@ -1,30 +1,27 @@
-# **Problema do Jantar dos Filósofos**
+# **Dining Philosophers Problem**
 
-[Relatório](#relatório)<br/>
-[Lógica do programa](#lógica-do-programa)<br/>
-[Resultados](#resultados)<br/>
-[Execução](#execução)<br/>
+[![en](https://img.shields.io/badge/lang-en-red.svg)](README.md)
+[![pt-br](https://img.shields.io/badge/lang-pt--br-green.svg)](README.br.md)
 
 
-## Relatório
-[O relatório se encontra aqui](./doc/Relatório%20Filósofos%2011796847.pdf)
-
-<br/>
-
-## Lógica do programa
-<br/>
-Os filósofos são executados em threads separadas e todas as garantias necessárias vêm de um monitor, que possui um ponteiro para todas as funções necessárias e garante acesso exclusivo à elas.
-Os filósofos possuem uma chance de ação em todo clock (definido pelo usuário). As ações consistem em ficar com fome e terminar de comer dependendo do estado atual do filósofo.
-O programa é encerrado após um número de ciclos de clock ou caso encontre erros de execução.
+[Program Logic](#program-logic)<br/>
+[Results](#results)<br/>
+[Execution](#execution)<br/>
 
 <br/>
 
-## Resultados
-O código foi executado sem conflitos por 5.000.000 ciclos de clock.
+## Program Logic
+The philosophers are executed in separate threads and all guarantees needed come from a monitor. It has a pointer to all necessary function and guarantees exclusive access to them.
+The philosophers have a chance of changing states every clock (set by user). The program will end itself after a number of cicles or if it finds any problems.
 
 <br/>
 
-## Execução
+## Results
+The code was executed without problems for 5.000.000 clock cicles.
+
+<br/>
+
+## Execution
 
 ```
     make run
@@ -32,7 +29,7 @@ O código foi executado sem conflitos por 5.000.000 ciclos de clock.
 
 <br/>
 
-É possível alterar o clock e a chance de ação pelas constantes em main.c
+It's possible to change the clock and the chance of changing states with constants in the main.c file
 
 ```c
     const int CLOCK = 5000;
@@ -40,4 +37,4 @@ O código foi executado sem conflitos por 5.000.000 ciclos de clock.
     const int CHANCE = 50;
 ```
 
-As seeds são as mesmas em toda execução
+The seeds are the same in every execution
